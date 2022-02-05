@@ -6,6 +6,8 @@ import { Container, Row, Col } from 'react-grid-system';
 import PeriodSelector from "../../components/PeriodSelector";
 import SummaryCard from "../../components/SummaryCard";
 import { PeriodSelectorContainer, SummaryContainer } from "./styles";
+import EntryGroup from "../../components/EntryGroup";
+import Spinner from "../../components/Spinner";
 
 const Home: React.FC = () => {
 
@@ -41,7 +43,7 @@ const Home: React.FC = () => {
             <Container>
                 <Row>
                     <Col sm={12} md={12} lg={8}>
-                    
+                        <EntryGroup />
                     </Col>
                     <Col sm={12} md={12} lg={4}>
                         <SummaryContainer>
