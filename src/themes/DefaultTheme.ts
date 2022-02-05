@@ -8,7 +8,10 @@ const DefaultTheme = {
     surface0: "#ffffff",
     surface1: "#f9f9f9",
     surface2: "#f2f2f2",
-    surface3: "#ececec"
+    surface3: "#ececec",
+    danger: "#ffaaaa",
+    warning: "#ffeeaa",
+    info: "#b7c8be"
 }
 
 export default DefaultTheme;

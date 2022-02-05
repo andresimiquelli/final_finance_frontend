@@ -3,10 +3,6 @@ import styled from "styled-components";
 export const Container = styled.div`
     width: 100%;
     height: 120px;
-    
-    background-color: ${props => props.theme.surface0};
-    border-radius: 7px;
-    box-shadow: 0 0 6px ${props => props.theme.text3};
 `;
 
 export const YearBar = styled.div`
