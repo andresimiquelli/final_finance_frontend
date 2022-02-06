@@ -1,12 +1,19 @@
+import ApiGroup from "./ApiGroup";
+import ApiRecurrency from "./ApiRecurrency";
+
 type ApiEntry = {
     id: number;
-    title: string;
-    description?: string;
     type: string;
     amount: number;
+    title: string;
+    description?: string;
+    installment?: number;
+    totalInstallments?: number;
     paid: boolean;
-    installment: number;
-    installmentTotal: number;
+    group?: ApiGroup;
+    recurrency?: ApiRecurrency;
+    created_at?: string;
+    updated_at?: string;
 }
 
 export default ApiEntry;

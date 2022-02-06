@@ -3,7 +3,7 @@ import React from 'react';
 import EntryCard from '../../components/Entry';
 import ApiEntry from '../../types/ApiEntry';
 
-import { Container, EntriesList } from './styles';
+import { Container, EntriesList, GroupSummaryContainer, DottedLine } from './styles';
 
 const entry1 = {
     id: 1,
@@ -35,7 +35,12 @@ const EntryGroup: React.FC = () => {
             <EntriesList>
                 {entries.map((entry, index) => <EntryCard key={index} entry={entry}/>)}                
             </EntriesList>
-            
+            <GroupSummaryContainer>
+                <DottedLine />
+                <div>
+                    <h3>R$ 600,00</h3>
+                </div>
+            </GroupSummaryContainer>
         </Container>
     );
 }

@@ -1,4 +1,7 @@
 import { createGlobalStyle } from 'styled-components';
+import { isPropertySignature } from 'typescript';
+
+import DefaultTheme from './themes/DefaultTheme';
 
 const GlobalStyles = createGlobalStyle`
 
@@ -17,8 +20,25 @@ const GlobalStyles = createGlobalStyle`
         color: inherit;
     }
 
+    input[type=text], input[type=password] {
+        width: 100%;
+        padding: .5rem 1rem;
+        border: 1px solid ${props => DefaultTheme.text3};
+        border-radius: 5px;
+    }
+
     button {
         cursor: pointer;
+
+        &.primary {
+            padding: .5rem 1rem;
+            font-size: 1rem;
+            font-weight: 500;
+            background-color: ${props => DefaultTheme.primary};
+            color: ${props => DefaultTheme.surface0};
+            border: none;
+            border-radius: 5px;
+        }
     }
 `;
 
