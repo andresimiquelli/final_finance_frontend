@@ -1,44 +1,51 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 import EntryCard from '../../components/Entry';
 import ApiEntry from '../../types/ApiEntry';
 
 import { Container, EntriesList, GroupSummaryContainer, DottedLine } from './styles';
 
-const entry1 = {
-    id: 1,
-    title: "Conta de luz",
-    description: "Conta de luz referente a dezembro",
-    type: 'DEBIT',
-    paid: false,
-    installment: 1,
-    installmentTotal: 1,
-    amount: 103.5
-} as ApiEntry
+interface EntryGroupProps {
+    groupId: number | null;
+    groupTitle: string;
+    groupColor: string;
+    entries: ApiEntry[];
+}
 
-const entry2 = {
-    id: 1,
-    title: "Internet",
-    type: 'DEBIT',
-    paid: false,
-    installment: 1,
-    installmentTotal: 1,
-    amount: 69.9
-} as ApiEntry
+const EntryGroup: React.FC<EntryGroupProps> = ( props ) => {
 
-const entries = [entry1, entry2]
+    const [entries, setEntries] = useState<ApiEntry[]>([])
+    const [amount, setAmount] = useState(0)
 
-const EntryGroup: React.FC = () => {
+    useEffect(() => {
+        let fEntries = props.entries.filter(
+            entry => entry.group&& 
+                (props.groupId===null? 
+                    (entry.group === null) :
+                    (entry.group.id===props.groupId))
+                )
+        setEntries(fEntries)
+        let fAmount = 0
+        fEntries.forEach(entry => {
+            entry.type === 'CREDIT'?
+                fAmount += entry.amount :
+                fAmount -= entry.amount
+        })
+        setAmount(fAmount)        
+    },[props.groupId])
+
     return (
         <Container>
-            <h3>Título do grupo</h3>
+            <h3>{ props.groupTitle }</h3>
             <EntriesList>
-                {entries.map((entry, index) => <EntryCard key={index} entry={entry}/>)}                
+                {
+                    entries.map((entry, index) => <EntryCard key={index} entry={entry}/>)
+                }                
             </EntriesList>
             <GroupSummaryContainer>
                 <DottedLine />
                 <div>
-                    <h3>R$ 600,00</h3>
+                    <h3>R$ { amount }</h3>
                 </div>
             </GroupSummaryContainer>
         </Container>

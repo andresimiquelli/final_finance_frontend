@@ -11,30 +11,31 @@ import { PeriodSelectorContainer, SummaryContainer } from "./styles";
 import EntryGroup from "../../components/EntryGroup";
 import Spinner from "../../components/Spinner";
 import ApiPeriod from "../../types/ApiPeriod";
+import ApiEntry from "../../types/ApiEntry";
 
 const Home: React.FC = () => {
 
-    const { token } = useAuth()
+    const { token, selectedWallet } = useAuth()
     const api = useApi(token)
 
     const date = new Date()
     const [periodYear, setPeriodYear] = useState(date.getFullYear())
     const [periodMonth, setPeriodMonth] = useState(date.getMonth()+1)
     const [loadingPeriod, setLoadPeriod] = useState(true)
-    const [period, setPeriod] = useState<ApiPeriod>()
+    const [period, setPeriod] = useState<ApiPeriod | undefined>()
+    const [totalCredits, setTotalCredits]  = useState(0)
+    const [totalDebits, setTotalDebits]  = useState(0)
 
     useEffect(() => {
         loadPeriod(periodYear, periodMonth)
-    },[])
+    },[periodYear, periodMonth])
 
     function handleYear(year: number) {
         setPeriodYear(year)
-        loadPeriod(year, periodMonth)
     }
 
     function handleMonth(month: number) {
         setPeriodMonth(month)
-        loadPeriod(periodYear, month)
     }
 
     function loadPeriod(year: number, month: number) {
@@ -42,19 +43,57 @@ const Home: React.FC = () => {
    
         api.get(`/periods/${year}/${month}`).then(
             response => {
-                setPeriod(response.data)
+                let lPeriod = response.data as ApiPeriod
+                setPeriod(lPeriod)
+                calcSummary(lPeriod.entries)
             }
         ).catch(
             error => {
-                console.log(error)
+                setPeriod(undefined)
             }
         ).finally(
             () => setLoadPeriod(false)
         )
     }
 
-    function mountGroups() {
-        console.log(period)
+    function showGroups() {
+        return (
+            period&&
+                <>
+                    <EntryGroup 
+                        key={`group_0`}
+                        groupId={null}
+                        groupTitle="Não agrupados"
+                        groupColor="inherit"
+                        entries={period? period.entries : []}
+                    />
+                    {
+                        selectedWallet?.groups.map((group, index) => 
+                            <EntryGroup 
+                                key={`group_${index}`}
+                                groupId={group.id}
+                                groupTitle={group.name}
+                                groupColor={group.color}
+                                entries={period? period.entries : []}
+                            />
+                        )
+                    }
+                </>
+        )
+    }
+
+    function calcSummary(lEntries: ApiEntry[]) {
+        let credits = 0
+        let debits = 0
+        lEntries.forEach(entry => {
+            if(entry.type==='CREDIT')
+                credits += entry.amount
+            else
+                debits += entry.amount
+        })
+
+        setTotalCredits(credits)
+        setTotalDebits(debits)
     }
 
     return (
@@ -86,13 +125,15 @@ const Home: React.FC = () => {
                 <Row>
                     <Col sm={12} md={12} lg={8}>
                         {
-                            loadingPeriod? <Spinner /> : mountGroups()
-                        }
-                        <EntryGroup />
+                            loadingPeriod? <Spinner /> : showGroups()
+                        }                        
                     </Col>
                     <Col sm={12} md={12} lg={4}>
                         <SummaryContainer>
-                            <SummaryCard />
+                            <SummaryCard 
+                                credit={totalCredits}
+                                debit={totalDebits}
+                            />
                         </SummaryContainer>
                     </Col>
                 </Row>
