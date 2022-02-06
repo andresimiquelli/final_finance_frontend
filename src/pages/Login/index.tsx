@@ -1,22 +1,68 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useApi } from '../../services/ApiService';
 
 import { Container, Row, Col } from 'react-grid-system'
 
-import { LoginForm, Logo, ErrorMessage } from './styles';
+import { LoginForm, Logo, ErrorMessage, WalletList } from './styles';
 import Spinner from '../../components/Spinner';
+import { FaWallet } from 'react-icons/fa';
+import ApiWallet from '../../types/ApiWallet';
 
 const Login: React.FC = () => {
 
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
 
-    const { login, loginErrorMessage, loading } = useAuth()
+    const { login, loginErrorMessage, loading, me, setSelectedWallet } = useAuth()
 
     function submit(e: React.FormEvent) {
         e.preventDefault()
         login(email, password)
+    }
+
+    function selectWallet(wallet: ApiWallet){
+        setSelectedWallet(wallet)
+    }
+
+    function showWalletList() {
+        console.log(me)
+        return (
+            <WalletList>
+                {
+                    me?.wallets.map((wallet, index) => 
+                        <div onClick={() => selectWallet(wallet)} key={`wallet_${index}`}>
+                            <FaWallet />
+                            <h3>{wallet.name}</h3>
+                            <h5>R$ {wallet.leftover}</h5>
+                        </div>
+                    )
+                }
+            </WalletList>
+        )
+    }
+
+    function showLoginForm() {
+        return (
+            <form action="#teste" onSubmit={submit}>
+                <div>
+                    <input 
+                        type="text"
+                        placeholder='e-mail'
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}/>
+                </div>
+                <div>
+                    <input 
+                        type="password" 
+                        placeholder='senha'
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}/>
+                </div>
+                <div>
+                    { loading? <Spinner /> : <button className='primary'>Entrar</button>}
+                </div>
+            </form>
+        )
     }
 
     return (
@@ -31,25 +77,8 @@ const Login: React.FC = () => {
 
                             { loginErrorMessage.length>0&& <ErrorMessage>{ loginErrorMessage }</ErrorMessage>}
 
-                            <form action="#teste" onSubmit={submit}>
-                                <div>
-                                    <input 
-                                        type="text"
-                                        placeholder='e-mail'
-                                        value={email}
-                                        onChange={e => setEmail(e.target.value)}/>
-                                </div>
-                                <div>
-                                    <input 
-                                        type="password" 
-                                        placeholder='senha'
-                                        value={password}
-                                        onChange={e => setPassword(e.target.value)}/>
-                                </div>
-                                <div>
-                                    { loading? <Spinner /> : <button className='primary'>Entrar</button>}
-                                </div>
-                            </form>
+                            { me? showWalletList() : showLoginForm() }
+                            
                         </div>
                     </LoginForm>
                 </Col>

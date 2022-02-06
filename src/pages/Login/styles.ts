@@ -39,3 +39,24 @@ export const ErrorMessage = styled.div`
     font-size: .9rem;
     color: ${props => props.theme.danger};
 `;
+
+export const WalletList = styled.div`
+    > div {
+        display: flex;
+        align-items: center;
+         > h3 {
+             flex: 1;
+             padding: 1rem;
+         }
+
+         > h5 {
+             min-width: 30%;
+         }
+
+         &:hover {
+            color: ${props => props.theme.primary};
+        }
+    }
+
+    cursor: pointer;
+`;

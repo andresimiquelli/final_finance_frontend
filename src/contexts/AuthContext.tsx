@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState } from 'react';
 import { useApi } from '../services/ApiService';
 
 import ApiUser from '../types/ApiUser';
+import ApiWallet from '../types/ApiWallet';
 
 interface AuthContextProps {
     token: string;
@@ -14,6 +15,8 @@ interface AuthContextProps {
     setLoginErrorMessage(message: string): void;
     login(email: string, password: string): void;
     logout(): void;
+    selectedWallet?: ApiWallet;
+    setSelectedWallet(wallet: ApiWallet): void;
 }
 
 const AuthContext = createContext<AuthContextProps>({} as AuthContextProps);
@@ -24,6 +27,7 @@ const AuthProvider: React.FC = ( { children } ) => {
     const [me, setMe] = useState<ApiUser>()
     const [loading, setLoading] = useState(false)
     const [loginErrorMessage, setLoginErrorMessage] = useState('')
+    const [selectedWallet, setSelectedWallet] = useState<ApiWallet>()
 
     const api = useApi()
 
@@ -31,10 +35,22 @@ const AuthProvider: React.FC = ( { children } ) => {
         setLoading(true)
         api.post('/login', {email: email, password: password}).then(
             response => {
-                setToken(response.data.token)
+                let lToken = response.data.token
+                setToken(lToken)
+                loadMe(lToken)
             }
         ).catch(
             () => setLoginErrorMessage("Usuário ou senha incorretos.")
+        )
+    }
+
+    function loadMe(lToken: string) {
+        api.get('/users/me', {headers: { "Authorization": "Bearer "+lToken } }).then(
+            response => {
+                setMe(response.data)
+            }
+        ).catch(
+            () => setLoginErrorMessage("Erro ao carregar informações do usuário")
         ).finally(
             () => setLoading(false)
         )
@@ -56,7 +72,9 @@ const AuthProvider: React.FC = ( { children } ) => {
                 loginErrorMessage, 
                 setLoginErrorMessage, 
                 login, 
-                logout}}
+                logout,
+                selectedWallet,
+                setSelectedWallet}}
         >
             { children }
         </AuthContext.Provider>

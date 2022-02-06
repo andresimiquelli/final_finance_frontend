@@ -10,13 +10,13 @@ import GlobalStyles from './GlobalStyles';
 
 const App: React.FC = () => {
 
-  const { token } = useAuth()
+  const { token, selectedWallet } = useAuth()
 
   return (
       <ThemeProvider theme={DefaultTheme}>
         <GlobalStyles />
         {
-          token!=undefined? token!=""? <AppRoutes /> : <AuthRoutes /> : <AuthRoutes />
+          token!=undefined? token!="" && selectedWallet!=undefined ? <AppRoutes /> : <AuthRoutes /> : <AuthRoutes />
         }
       </ThemeProvider>
   );
