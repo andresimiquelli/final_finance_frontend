@@ -39,8 +39,12 @@ const AuthProvider: React.FC = ( { children } ) => {
                 setToken(lToken)
                 loadMe(lToken)
             }
-        ).catch(
+        )
+        .catch(
             () => setLoginErrorMessage("Usuário ou senha incorretos.")
+        )
+        .finally(
+            () => setLoading(false)
         )
     }
 

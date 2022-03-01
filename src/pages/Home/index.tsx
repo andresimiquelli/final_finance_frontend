@@ -12,7 +12,6 @@ import EntryGroup from "../../components/EntryGroup";
 import Spinner from "../../components/Spinner";
 import ApiPeriod from "../../types/ApiPeriod";
 import ApiEntry from "../../types/ApiEntry";
-import Modal from "../../components/Modal";
 import EntryForm from "../Frames/EntryForm";
 
 const Home: React.FC = () => {
@@ -29,7 +28,7 @@ const Home: React.FC = () => {
     const [totalCredits, setTotalCredits]  = useState(0)
     const [totalDebits, setTotalDebits]  = useState(0)
 
-    const [entryFormIsVisible, setEntryFormIsVisible] = useState(true)
+    const [entryFormIsVisible, setEntryFormIsVisible] = useState(false)
 
     useEffect(() => {
         loadPeriod(periodYear, periodMonth)
@@ -85,7 +84,7 @@ const Home: React.FC = () => {
         )
     }
 
-    function showGroups() {
+    function showGroups(lEntries: ApiEntry[]) {
         return (
             period&&
                 <>
@@ -94,7 +93,7 @@ const Home: React.FC = () => {
                         groupId={null}
                         groupTitle="Não agrupados"
                         groupColor="inherit"
-                        entries={entries? entries: []}
+                        entries={lEntries}
                         onPaidClick={setPaid}
                     />
                     {
@@ -104,7 +103,7 @@ const Home: React.FC = () => {
                                 groupId={group.id}
                                 groupTitle={group.name}
                                 groupColor={group.color}
-                                entries={entries? entries : []}
+                                entries={lEntries}
                                 onPaidClick={setPaid}
                             />
                         )
@@ -127,11 +126,21 @@ const Home: React.FC = () => {
         setTotalDebits(debits)
     }
 
+    function onSaveEntry(data: ApiEntry[]) {
+        loadPeriod(periodYear, periodMonth)
+        setEntryFormIsVisible(false)
+    }
+
     return (
         <>
-            <Modal visible={entryFormIsVisible} onClose={() => setEntryFormIsVisible(false)}>
-                <EntryForm />
-            </Modal>
+            <EntryForm 
+                open={entryFormIsVisible}
+                onClose={() => setEntryFormIsVisible(false)}
+                groups={selectedWallet?.groups}
+                periodMonth={periodMonth}
+                periodYear={periodYear}
+                onSave={onSaveEntry}
+            />
             <Container>
                 <Row>
                     <Col sm={12}>
@@ -159,10 +168,11 @@ const Home: React.FC = () => {
                 <Row>
                     <Col sm={12} md={12} lg={8}>
                         {
-                            loadingPeriod? <Spinner /> : showGroups()
+                            loadingPeriod? <Spinner /> : showGroups(entries? entries : [])
                         }                        
                     </Col>
                     <Col sm={12} md={12} lg={4}>
+                        <button className="primary" onClick={() => setEntryFormIsVisible(true)}>Nova entrada</button>
                         <SummaryContainer>
                             <SummaryCard 
                                 credit={totalCredits}

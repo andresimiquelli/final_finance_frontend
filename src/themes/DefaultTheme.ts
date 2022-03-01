@@ -11,7 +11,8 @@ const DefaultTheme = {
     surface3: "#ececec",
     danger: "#ffaaaa",
     warning: "#ffeeaa",
-    info: "#b7c8be"
+    info: "#b7c8be",
+    error: "#ff5555"
 }
 
 export default DefaultTheme;

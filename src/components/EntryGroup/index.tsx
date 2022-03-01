@@ -19,12 +19,17 @@ const EntryGroup: React.FC<EntryGroupProps> = ( props ) => {
     const [amount, setAmount] = useState(0)
 
     useEffect(() => {
-        let fEntries = props.entries.filter(
-            entry => entry.group&& 
-                (props.groupId===null? 
-                    (entry.group === null) :
-                    (entry.group.id===props.groupId))
-                )
+        let fEntries = props.entries.filter( entry => {
+            if(!props.groupId){
+                if(!entry.group)
+                    return true
+            } else {
+                if(entry.group)
+                    return entry.group.id === props.groupId
+            }                
+
+            return false
+        })
         setEntries(fEntries)
         let fAmount = 0
         fEntries.forEach(entry => {

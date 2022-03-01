@@ -8,6 +8,7 @@ interface ModalProps {
     visible: boolean;
     onClose?(): void;
     onConfirm?(): void;
+    title?: string;
 }
 
 const Modal: React.FC<ModalProps> = ( props ) => {
@@ -15,7 +16,7 @@ const Modal: React.FC<ModalProps> = ( props ) => {
         <Container visible={props.visible}>
             <Window>
                 <TitleBar>
-                    <h3>Title</h3>
+                    <h3>{props.title}</h3>
                     <button 
                         onClick={() => props.onClose&& props.onClose()}>
                             <RiCloseFill />

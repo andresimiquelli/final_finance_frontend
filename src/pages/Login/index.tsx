@@ -25,7 +25,7 @@ const Login: React.FC = () => {
     }
 
     function showWalletList() {
-        console.log(me)
+   
         return (
             <WalletList>
                 {

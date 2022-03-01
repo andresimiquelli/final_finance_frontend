@@ -20,7 +20,7 @@ const GlobalStyles = createGlobalStyle`
         color: inherit;
     }
 
-    input[type=text], input[type=password] {
+    input[type=text], input[type=password], input[type=number], input[type=email]  {
         width: 100%;
         padding: .5rem 1rem;
         border: 1px solid ${props => DefaultTheme.text3};
@@ -49,6 +49,12 @@ const GlobalStyles = createGlobalStyle`
             border: none;
             border-radius: 5px;
         }
+    }
+
+    select {
+        padding: .5rem 1rem;
+        border: 1px solid ${props => DefaultTheme.text3};
+        border-radius: 5px;
     }
 `;
 
