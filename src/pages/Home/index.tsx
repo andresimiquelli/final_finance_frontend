@@ -12,6 +12,8 @@ import EntryGroup from "../../components/EntryGroup";
 import Spinner from "../../components/Spinner";
 import ApiPeriod from "../../types/ApiPeriod";
 import ApiEntry from "../../types/ApiEntry";
+import Modal from "../../components/Modal";
+import EntryForm from "../Frames/EntryForm";
 
 const Home: React.FC = () => {
 
@@ -22,9 +24,12 @@ const Home: React.FC = () => {
     const [periodYear, setPeriodYear] = useState(date.getFullYear())
     const [periodMonth, setPeriodMonth] = useState(date.getMonth()+1)
     const [loadingPeriod, setLoadPeriod] = useState(true)
-    const [period, setPeriod] = useState<ApiPeriod | undefined>()
+    const [period, setPeriod] = useState<ApiPeriod>()
+    const [entries, setEntries] = useState<ApiEntry[]>()
     const [totalCredits, setTotalCredits]  = useState(0)
     const [totalDebits, setTotalDebits]  = useState(0)
+
+    const [entryFormIsVisible, setEntryFormIsVisible] = useState(true)
 
     useEffect(() => {
         loadPeriod(periodYear, periodMonth)
@@ -46,13 +51,37 @@ const Home: React.FC = () => {
                 let lPeriod = response.data as ApiPeriod
                 setPeriod(lPeriod)
                 calcSummary(lPeriod.entries)
+                setEntries(lPeriod.entries.map(ent => ent))
             }
         ).catch(
-            error => {
+            () => {
                 setPeriod(undefined)
             }
         ).finally(
             () => setLoadPeriod(false)
+        )
+    }
+
+    function setPaid(id: number, paid: boolean) {
+        let ents = entries?.map(ent => {
+            if(ent.id === id)
+                ent.paid = !paid
+            return ent
+        })
+        
+        setEntries(ents)
+
+        api.put(`/entries/${id}`,{paid: !paid})
+        .catch(
+            () => {
+                let ents = entries?.map(ent => {
+                    if(ent.id === id)
+                        ent.paid = paid
+                    return ent
+                })
+
+                setEntries(ents)
+            }
         )
     }
 
@@ -65,7 +94,8 @@ const Home: React.FC = () => {
                         groupId={null}
                         groupTitle="Não agrupados"
                         groupColor="inherit"
-                        entries={period? period.entries : []}
+                        entries={entries? entries: []}
+                        onPaidClick={setPaid}
                     />
                     {
                         selectedWallet?.groups.map((group, index) => 
@@ -74,7 +104,8 @@ const Home: React.FC = () => {
                                 groupId={group.id}
                                 groupTitle={group.name}
                                 groupColor={group.color}
-                                entries={period? period.entries : []}
+                                entries={entries? entries : []}
+                                onPaidClick={setPaid}
                             />
                         )
                     }
@@ -98,6 +129,9 @@ const Home: React.FC = () => {
 
     return (
         <>
+            <Modal visible={entryFormIsVisible} onClose={() => setEntryFormIsVisible(false)}>
+                <EntryForm />
+            </Modal>
             <Container>
                 <Row>
                     <Col sm={12}>

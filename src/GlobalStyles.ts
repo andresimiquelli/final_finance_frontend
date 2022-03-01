@@ -39,6 +39,16 @@ const GlobalStyles = createGlobalStyle`
             border: none;
             border-radius: 5px;
         }
+
+        &.secondary {
+            padding: .5rem 1rem;
+            font-size: 1rem;
+            font-weight: 500;
+            background-color: ${props => DefaultTheme.secondary};
+            color: ${props => DefaultTheme.surface0};
+            border: none;
+            border-radius: 5px;
+        }
     }
 `;
 

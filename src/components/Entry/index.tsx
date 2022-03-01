@@ -18,12 +18,16 @@ import ApiEntry from '../../types/ApiEntry';
 
 interface EntryProps {
     entry: ApiEntry;
+    onPaidClick(id: number, paid: boolean): void;
 }
 
 const Entry: React.FC<EntryProps> = ( props ) => {
+    
     return (
         <Container>
-            <PaidContainer className={props.entry.paid? 'checked' : 'unchecked'}>
+            <PaidContainer 
+                className={props.entry.paid? 'checked' : 'unchecked'}
+                onClick={() => props.onPaidClick(props.entry.id, props.entry.paid)}>
             {props.entry.paid? <MdCheckBox /> : <MdCheckBoxOutlineBlank />}
             </PaidContainer>
             <TextContainer>
