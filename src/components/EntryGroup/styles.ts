@@ -1,7 +1,14 @@
 import styled from 'styled-components';
 
-export const Container = styled.div`
+interface ContainerProps {
+    opacity?: boolean;
+}
+
+export const Container = styled.div<ContainerProps>`
     width: 100;
+    padding-bottom: 1rem;
+
+    opacity: ${props => props.opacity? '.4' : '1'};
 `;
 
 export const EntriesList = styled.div`

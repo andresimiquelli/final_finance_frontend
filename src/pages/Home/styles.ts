@@ -11,9 +11,14 @@ export const SummaryContainer = styled.div`
     padding-left: 1rem;
 `;
 
-export const ButtonBar = styled.div`
+interface ButtonBarProps {
+    align?: "center" | "flex-start" | "flex-end";
+}
+
+export const ButtonBar = styled.div<ButtonBarProps>`
     display: flex;
     align-items: center;
+    justify-content: ${props => props.align? props.align : 'center'};
 
     padding: 1rem 0;
 

@@ -8,6 +8,8 @@ import { Container, Row, Col } from 'react-grid-system';
 import PeriodSelector from "../../components/PeriodSelector";
 import SummaryCard from "../../components/SummaryCard";
 import { FiPlus } from 'react-icons/fi';
+import { VscNewFile } from 'react-icons/vsc';
+import { ImUnlocked } from 'react-icons/im';
 
 import { PeriodSelectorContainer, SummaryContainer, ButtonBar } from "./styles";
 
@@ -33,6 +35,7 @@ const Home: React.FC = () => {
 
     const [entryFormIsVisible, setEntryFormIsVisible] = useState(false)
     const [editEntry, setEditEntry] = useState<ApiEntry | undefined>()
+    const [isPromisse, setIsPromisse] = useState(false)
 
     useEffect(() => {
         loadPeriod(periodYear, periodMonth)
@@ -49,16 +52,24 @@ const Home: React.FC = () => {
     function loadPeriod(year: number, month: number) {
         setLoadPeriod(true)
    
-        api.get(`/periods/${year}/${month}`).then(
+        api.get(`/periods/${year}/${month}?walletId=${selectedWallet?.id}`).then(
             response => {
                 let lPeriod = response.data as ApiPeriod
                 setPeriod(lPeriod)
                 calcSummary(lPeriod.entries)
                 setEntries(lPeriod.entries.map(ent => ent))
+                setIsPromisse(false)
             }
         ).catch(
-            () => {
-                setPeriod(undefined)
+            error => {
+                if(error.response) {
+                    if(error.response.status==404){
+                        let promisses = getPromisses()
+                        setEntries(promisses)
+                        calcSummary(promisses)
+                        setIsPromisse(true)
+                    }
+                }
             }
         ).finally(
             () => setLoadPeriod(false)
@@ -97,10 +108,41 @@ const Home: React.FC = () => {
 
     }
 
+    function startPeriod() {
+        setLoadPeriod(true)
+        let data = {
+            year: periodYear,
+            month: periodMonth,
+            walletId: selectedWallet?.id
+        }
+
+        api.post('/periods', data)
+        .then(
+            response => {
+                let lPeriod = response.data as ApiPeriod
+                loadPeriod(lPeriod.year, lPeriod.month)
+            }
+        )
+        .catch(
+            error => {
+                console.log(error)
+                setLoadPeriod(false)
+            }
+        )
+    }
+
     function showGroups(lEntries: ApiEntry[]) {
         return (
-            period&&
+            entries&&
                 <>
+                    {
+                        isPromisse&&
+                        <ButtonBar>
+                            <button onClick={startPeriod}>
+                                <VscNewFile/>Iniciar período
+                            </button>
+                        </ButtonBar>
+                    }
                     <EntryGroup 
                         key={`group_0`}
                         groupId={null}
@@ -110,6 +152,7 @@ const Home: React.FC = () => {
                         onPaidClick={setPaid}
                         onDeleteClick={handleDeleteEntry}
                         onEditClick={handleEditEntry}
+                        opacity={isPromisse}
                     />
                     {
                         selectedWallet?.groups.map((group, index) => 
@@ -122,6 +165,7 @@ const Home: React.FC = () => {
                                 onPaidClick={setPaid}
                                 onDeleteClick={handleDeleteEntry}
                                 onEditClick={handleEditEntry}
+                                opacity={isPromisse}
                             />
                         )
                     }
@@ -148,11 +192,43 @@ const Home: React.FC = () => {
         setEntryFormIsVisible(false)
     }
 
+    function onCloseEntryForm() {
+        setEntryFormIsVisible(false)
+        setEditEntry(undefined)
+    }
+
+    function getPromisses(): ApiEntry[] {
+
+        if(selectedWallet) {
+            let promisses = selectedWallet?.recurrences.map(rec => {
+                return {
+                    id: rec.id,
+                    type: rec.type,
+                    amount: rec.amount,
+                    title: rec.title,
+                    description: rec.description,
+                    installment: 1,
+                    totalInstallments: 1,
+                    paid: false,
+                    group: rec.group
+                } as ApiEntry
+            })
+
+            return promisses
+        }        
+
+        return []
+    }
+
+    function closePeriod() {
+
+    }
+
     return (
         <>
             <EntryForm 
                 open={entryFormIsVisible}
-                onClose={() => setEntryFormIsVisible(false)}
+                onClose={onCloseEntryForm}
                 groups={selectedWallet?.groups}
                 periodMonth={periodMonth}
                 periodYear={periodYear}
@@ -198,6 +274,11 @@ const Home: React.FC = () => {
                                 credit={totalCredits}
                                 debit={totalDebits}
                             />
+                            <ButtonBar>
+                                <button onClick={closePeriod}>
+                                    <ImUnlocked /> Encerrar período
+                                </button>
+                            </ButtonBar>
                         </SummaryContainer>
                     </Col>
                 </Row>

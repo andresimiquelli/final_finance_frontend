@@ -9,6 +9,10 @@ export const Container = styled.div`
     align-items: center;
 
     border-bottom: 1px solid ${props => props.theme.surface3};
+
+    :last-child {
+        border-bottom: none;
+    }
 `;
 
 export const TextContainer = styled.div`

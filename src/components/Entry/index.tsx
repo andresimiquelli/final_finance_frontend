@@ -22,6 +22,7 @@ interface EntryProps {
     onPaidClick(id: number, paid: boolean): void;
     onDeleteClick(id: number): void;
     onEditClick(entry: ApiEntry): void;
+    disableMenu?: boolean;
 }
 
 const Entry: React.FC<EntryProps> = ( props ) => {
@@ -32,7 +33,7 @@ const Entry: React.FC<EntryProps> = ( props ) => {
         <Container>
             <PaidContainer 
                 className={props.entry.paid? 'checked' : 'unchecked'}
-                onClick={() => props.onPaidClick(props.entry.id, props.entry.paid)}>
+                onClick={() => !props.disableMenu&& props.onPaidClick(props.entry.id, props.entry.paid)}>
             {props.entry.paid? <MdCheckBox /> : <MdCheckBoxOutlineBlank />}
             </PaidContainer>
             <TextContainer>
@@ -49,7 +50,7 @@ const Entry: React.FC<EntryProps> = ( props ) => {
                 R$ {props.entry.amount}
             </AmountContainer>
             <OptionsContainer>
-                <button onClick={() => setMenuOpen(true)} onBlur={() => setMenuOpen(false)}>
+                <button onClick={() => setMenuOpen(true)} onBlur={() => setMenuOpen(false)} disabled={props.disableMenu}>
                   <HiDotsHorizontal />
                   <MenuBox open={menuOpen}>
                     <div onClick={() => props.onEditClick(props.entry)}><MdEdit/></div>

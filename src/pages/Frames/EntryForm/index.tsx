@@ -9,6 +9,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { useApi } from '../../../services/ApiService';
 import Modal from '../../../components/Modal';
 import Spinner from '../../../components/Spinner';
+import { nextPeriod } from '../../../utils/NextPeriod'
 
 interface EntryFormProps {
     open: boolean;
@@ -57,19 +58,18 @@ const EntryForm: React.FC<EntryFormProps> = ( props ) => {
         setAmount(props.entry? props.entry.amount : 0)
     },[props.entry])
 
-    function handleChangeAmount(value: string) {
-        let am = parseFloat(value)
-        setAmount(Math.floor(am*100))
-    }
-
     function save() {
         
         if(validate())
         {
-            if(id > 0)
+            if(id > 0) {
                 saveEdit()
-            else
-                saveNew()
+            } else {
+                if(installments > 1) 
+                    saveInstallments()
+                else
+                    saveNew()
+            }   
         }
     }
 
@@ -101,6 +101,36 @@ const EntryForm: React.FC<EntryFormProps> = ( props ) => {
                 cleanForm()
                 props.onSave&&
                     props.onSave([response.data])
+            }
+        )
+        .catch(
+            error => console.log(error)
+        )
+        .finally(
+            () => setLoading(false)
+        )
+    }
+
+    function saveInstallments() {
+        setLoading(true)
+        let data = mountData()
+        let list = [] as postEntry[]
+        data.amount = Math.round((amount/installments)*10)/10
+
+        for(let i = 0; i < installments; i++) {
+            let next = nextPeriod(props.periodYear, props.periodMonth, (i+1))
+            let nData = {...data}
+            nData.periodYear = next.year
+            nData.periodMonth = next.month
+            list.push(nData)
+        }
+
+        api.post('/entries/installments', list)
+        .then(
+            response => {
+                cleanForm()
+                props.onSave&&
+                    props.onSave(response.data)
             }
         )
         .catch(
@@ -151,9 +181,14 @@ const EntryForm: React.FC<EntryFormProps> = ( props ) => {
         setInstallments(1)
     }
 
+    function handleClose() {
+        cleanForm()
+        props.onClose()
+    }
+
     function showForm() {
         return (
-            <Modal visible={props.open} title="Entrada" onClose={props.onClose} onConfirm={save}>
+            <Modal visible={props.open} title="Lançamento" onClose={handleClose} onConfirm={save}>
                 <Container>
                         <div>
                             <div>
@@ -203,7 +238,11 @@ const EntryForm: React.FC<EntryFormProps> = ( props ) => {
                         <div>
                             <div>
                                 Valor
-                                <input type="number" step=".01" value={amount} onChange={(e) => handleChangeAmount(e.target.value)} />
+                                <input 
+                                type="number" 
+                                step=".01" 
+                                value={amount} 
+                                onChange={(e) => setAmount(parseFloat(e.target.value))} />
                             </div>
                             <div>
                                 Parcelas

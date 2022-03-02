@@ -13,6 +13,7 @@ interface EntryGroupProps {
     onPaidClick(id: number, paid: boolean): void;
     onDeleteClick(id: number): void;
     onEditClick(entry: ApiEntry): void;
+    opacity?: boolean;
 }
 
 const EntryGroup: React.FC<EntryGroupProps> = ( props ) => {
@@ -43,7 +44,7 @@ const EntryGroup: React.FC<EntryGroupProps> = ( props ) => {
     },[props.groupId])
 
     return (
-        <Container>
+        <Container opacity={props.opacity}>
             <h3>{ props.groupTitle }</h3>
             <EntriesList>
                 {
@@ -53,7 +54,8 @@ const EntryGroup: React.FC<EntryGroupProps> = ( props ) => {
                             entry={entry}
                             onPaidClick={props.onPaidClick}
                             onDeleteClick={props.onDeleteClick}
-                            onEditClick={props.onEditClick}/>
+                            onEditClick={props.onEditClick}
+                            disableMenu={props.opacity}/>
                     )
                 }                
             </EntriesList>
