@@ -9,7 +9,7 @@ import PeriodSelector from "../../components/PeriodSelector";
 import SummaryCard from "../../components/SummaryCard";
 import { FiPlus } from 'react-icons/fi';
 import { VscNewFile } from 'react-icons/vsc';
-import { ImUnlocked } from 'react-icons/im';
+import { ImUnlocked, ImLock } from 'react-icons/im';
 
 import { PeriodSelectorContainer, SummaryContainer, ButtonBar } from "./styles";
 
@@ -18,6 +18,7 @@ import Spinner from "../../components/Spinner";
 import ApiPeriod from "../../types/ApiPeriod";
 import ApiEntry from "../../types/ApiEntry";
 import EntryForm from "../Frames/EntryForm";
+import Modal from "../../components/Modal";
 
 const Home: React.FC = () => {
 
@@ -36,6 +37,12 @@ const Home: React.FC = () => {
     const [entryFormIsVisible, setEntryFormIsVisible] = useState(false)
     const [editEntry, setEditEntry] = useState<ApiEntry | undefined>()
     const [isPromisse, setIsPromisse] = useState(false)
+
+    const [deleteConfirmIsVisible, setDeleteConfirmIsVisible] = useState(false)
+    const [deleteId, setDeleteId] = useState(0)
+
+    const [closePeriodConfirmIsVisible, setClosePeriodConfirmIsVisible] = useState(false)
+    const [openPeriodConfirmIsVisible, setOpenPeriodConfirmIsVisible] = useState(false)
 
     useEffect(() => {
         loadPeriod(periodYear, periodMonth)
@@ -70,6 +77,8 @@ const Home: React.FC = () => {
                         setIsPromisse(true)
                     }
                 }
+
+                setPeriod(undefined)
             }
         ).finally(
             () => setLoadPeriod(false)
@@ -105,7 +114,8 @@ const Home: React.FC = () => {
     }
 
     function handleDeleteEntry(id: number) {
-
+        setDeleteId(id)
+        setDeleteConfirmIsVisible(true)
     }
 
     function startPeriod() {
@@ -135,14 +145,14 @@ const Home: React.FC = () => {
         return (
             entries&&
                 <>
+                    <ButtonBar>
                     {
-                        isPromisse&&
-                        <ButtonBar>
+                        isPromisse&&                        
                             <button onClick={startPeriod}>
                                 <VscNewFile/>Iniciar período
                             </button>
-                        </ButtonBar>
                     }
+                    </ButtonBar>
                     <EntryGroup 
                         key={`group_0`}
                         groupId={null}
@@ -220,12 +230,82 @@ const Home: React.FC = () => {
         return []
     }
 
-    function closePeriod() {
+    function updatePeriod(status: 'OPEN' | 'CLOSE') {
+        let data = {status: status}
+        setOpenPeriodConfirmIsVisible(false)
+        setClosePeriodConfirmIsVisible(false)
+        setLoadPeriod(true)
+        api.put(`/periods/${period?.id}`, data)
+        .then(
+            () => loadPeriod(periodYear, periodMonth)
+        )
+        .catch(
+            error => console.log(error)
+        )
+        .finally(
+            () => setLoadPeriod(false)
+        )
+    }
 
+    function deleteEntry() {
+        setLoadPeriod(true)
+        setDeleteConfirmIsVisible(false)
+        api.delete(`/entries/${deleteId}`)
+        .then(
+            () => {
+                loadPeriod(periodYear, periodMonth)
+            }
+        )
+        .catch(
+            error => console.log(error)
+        )
+        .finally(
+            () => setLoadPeriod(false)
+        )
+    }
+
+    function handleClosePeriod() {
+        setClosePeriodConfirmIsVisible(true)
+    }
+
+    function handleOpenPeriod() {
+        setOpenPeriodConfirmIsVisible(true)
     }
 
     return (
         <>
+            <Modal 
+                visible={closePeriodConfirmIsVisible}
+                onClose={() => setClosePeriodConfirmIsVisible(false)}
+                onConfirm={() => updatePeriod("CLOSE")}
+                showCloseButton
+                confirmButtonText="Encerrar"
+                closeButtonText="Cancelar"
+                title="Encerrar período">
+                    Ao encerrar o período, seu saldo se soma à carteira. <br/>
+                    <strong>Deseja encerrar este período?</strong> 
+            </Modal>
+            <Modal 
+                visible={openPeriodConfirmIsVisible}
+                onClose={() => setOpenPeriodConfirmIsVisible(false)}
+                onConfirm={() => updatePeriod("OPEN")}
+                showCloseButton
+                confirmButtonText="Reabrir"
+                closeButtonText="Cancelar"
+                title="Reabrir período">
+                    Ao reabrir o período, seu saldo é subtraído da carteira. <br/>
+                    <strong>Deseja reabrir este período?</strong> 
+            </Modal>
+            <Modal 
+                visible={deleteConfirmIsVisible}
+                onClose={() => setDeleteConfirmIsVisible(false)}
+                onConfirm={deleteEntry}
+                showCloseButton
+                confirmButtonText="Excluir"
+                closeButtonText="Cancelar"
+                title="Excluir">
+                Deseja exluir este lançamento?
+            </Modal>
             <EntryForm 
                 open={entryFormIsVisible}
                 onClose={onCloseEntryForm}
@@ -268,16 +348,36 @@ const Home: React.FC = () => {
                     <Col sm={12} md={12} lg={4}>
                         <SummaryContainer>
                             <ButtonBar>
-                                <button onClick={() => setEntryFormIsVisible(true)}><FiPlus />Novo lançamento</button>
+                                {
+                                    !isPromisse&&
+                                        period&&
+                                            period.status==='OPEN'&&
+                                                <button onClick={() => setEntryFormIsVisible(true)}>
+                                                    <FiPlus />Novo lançamento
+                                                </button>
+                                }
+                                {
+                                    period&&
+                                        period.status==='CLOSE'&&
+                                            <button onClick={handleOpenPeriod}>
+                                                <ImLock /> Reabrir período
+                                            </button>
+                                }
                             </ButtonBar>
                             <SummaryCard 
                                 credit={totalCredits}
                                 debit={totalDebits}
                             />
                             <ButtonBar>
-                                <button onClick={closePeriod}>
-                                    <ImUnlocked /> Encerrar período
-                                </button>
+                                {
+                                    !isPromisse&&
+                                        period&&
+                                            period.status === 'OPEN'&&
+                                                <button onClick={handleClosePeriod}>
+                                                    <ImUnlocked /> Encerrar período
+                                                </button>
+                                }
+                                
                             </ButtonBar>
                         </SummaryContainer>
                     </Col>

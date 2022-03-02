@@ -25,7 +25,6 @@ export const Window = styled.div`
     width: 100%;
     max-width: 800px;
 
-    min-height: 400px;
     max-height: 80vh;
     
     background-color: ${props => props.theme.surface0};
@@ -64,6 +63,14 @@ export const ButtonBar = styled.div`
 
     padding-top: 1.3rem;
     border-top: 1px solid ${props => props.theme.surface3};
+
+    > button {
+        margin-right: .5rem;
+
+        :last-child {
+            margin-right: none;
+        }
+    }
 `;
 
 export const Content = styled.div`

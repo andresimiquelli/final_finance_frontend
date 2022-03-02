@@ -9,27 +9,45 @@ interface ModalProps {
     onClose?(): void;
     onConfirm?(): void;
     title?: string;
+    showCloseButton?: boolean;
+    closeButtonText?: string;
+    hideCloseIcon?: boolean;
+    hideTitleBar?: boolean;
+    confirmButtonText?: string;
 }
 
 const Modal: React.FC<ModalProps> = ( props ) => {
     return (
         <Container visible={props.visible}>
             <Window>
-                <TitleBar>
-                    <h3>{props.title}</h3>
-                    <button 
-                        onClick={() => props.onClose&& props.onClose()}>
-                            <RiCloseFill />
-                    </button>
-                </TitleBar>
+                {
+                    !props.hideTitleBar&&
+                        <TitleBar>
+                            <h3>{props.title}</h3>
+                            {
+                                !props.hideCloseIcon&&
+                                <button 
+                                    onClick={() => props.onClose&& props.onClose()}>
+                                        <RiCloseFill />
+                                </button>
+                            }
+                        </TitleBar>
+                }
+                
                 <Content>
                     { props.children }
                 </Content>
                 <ButtonBar>
+                    {
+                        props.showCloseButton&&
+                        <button className='secondary' onClick={() => props.onClose&& props.onClose()}>
+                            {props.closeButtonText? props.closeButtonText : 'Cancelar'}
+                        </button>
+                    }
                     <button 
                         className='primary' 
                         onClick={() => props.onConfirm&& props.onConfirm()}>
-                            Salvar
+                            { props.confirmButtonText? props.confirmButtonText : 'Ok'}
                     </button>
                 </ButtonBar>
             </Window>

@@ -188,7 +188,13 @@ const EntryForm: React.FC<EntryFormProps> = ( props ) => {
 
     function showForm() {
         return (
-            <Modal visible={props.open} title="Lançamento" onClose={handleClose} onConfirm={save}>
+            <Modal 
+                visible={props.open} 
+                title="Lançamento" 
+                onClose={handleClose} 
+                onConfirm={save} 
+                confirmButtonText="Salvar"
+                showCloseButton>
                 <Container>
                         <div>
                             <div>
