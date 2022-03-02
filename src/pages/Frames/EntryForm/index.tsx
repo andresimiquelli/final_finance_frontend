@@ -1,4 +1,4 @@
-import React,{ useState } from 'react';
+import React,{ useEffect, useState } from 'react';
 
 import { Container, ErrorMessage } from './styles';
 
@@ -37,16 +37,25 @@ const EntryForm: React.FC<EntryFormProps> = ( props ) => {
     const { token, selectedWallet } = useAuth()
     const api = useApi(token)
 
-    const[id,setId] = useState(props.entry? props.entry.id : 0)
-    const[type,setType] = useState(props.entry? props.entry.type : 'DEBIT')
-    const[title,setTitle] = useState(props.entry? props.entry.title : '')
-    const[description,setDescription] = useState<string>(props.entry? props.entry.description? props.entry.description : '' : '')
-    const[group,setGroup] = useState<number>(props.entry? props.entry.group? props.entry.group.id : 0 : 0)
-    const[amount,setAmount] = useState(props.entry? props.entry.amount : 0)
+    const[id,setId] = useState(0)
+    const[type,setType] = useState('DEBIT')
+    const[title,setTitle] = useState('')
+    const[description,setDescription] = useState<string>('')
+    const[group,setGroup] = useState<number>(0)
+    const[amount,setAmount] = useState(0)
     const[installments,setInstallments] = useState(1)
 
     const[loading,setLoading] = useState(false)
     const[errorTitle,setErrorTitle] = useState('')
+
+    useEffect(() => {
+        setId(props.entry? props.entry.id : 0)
+        setType(props.entry? props.entry.type : 'DEBIT')
+        setTitle(props.entry? props.entry.title : '')
+        setDescription(props.entry? props.entry.description? props.entry.description : '' : '')
+        setGroup(props.entry? props.entry.group? props.entry.group.id : 0 : 0)
+        setAmount(props.entry? props.entry.amount : 0)
+    },[props.entry])
 
     function handleChangeAmount(value: string) {
         let am = parseFloat(value)
@@ -57,24 +66,49 @@ const EntryForm: React.FC<EntryFormProps> = ( props ) => {
         
         if(validate())
         {
-            setLoading(true)
-            let data = mountData()
-            api.post('/entries', data)
-            .then(
-                response => {
-                    cleanForm()
-                    props.onSave&&
-                        props.onSave([response.data])
-                }
-            )
-            .catch(
-                error => console.log(error)
-            )
-            .finally(
-                () => setLoading(false)
-            )
+            if(id > 0)
+                saveEdit()
+            else
+                saveNew()
         }
-        
+    }
+
+    function saveNew() {
+        setLoading(true)
+        let data = mountData()
+        api.post('/entries', data)
+        .then(
+            response => {
+                cleanForm()
+                props.onSave&&
+                    props.onSave([response.data])
+            }
+        )
+        .catch(
+            error => console.log(error)
+        )
+        .finally(
+            () => setLoading(false)
+        )
+    }
+
+    function saveEdit() {
+        setLoading(true)
+        let data = mountData()
+        api.put(`/entries/${id}`, data)
+        .then(
+            response => {
+                cleanForm()
+                props.onSave&&
+                    props.onSave([response.data])
+            }
+        )
+        .catch(
+            error => console.log(error)
+        )
+        .finally(
+            () => setLoading(false)
+        )
     }
 
     function mountData(): postEntry {
@@ -169,11 +203,18 @@ const EntryForm: React.FC<EntryFormProps> = ( props ) => {
                         <div>
                             <div>
                                 Valor
-                                <input type="number" step=".01" value={amount/100} onChange={(e) => handleChangeAmount(e.target.value)} />
+                                <input type="number" step=".01" value={amount} onChange={(e) => handleChangeAmount(e.target.value)} />
                             </div>
                             <div>
                                 Parcelas
-                                <input type="number" step={1} min={1} max={99} value={installments} onChange={(e) => setInstallments(parseInt(e.target.value))}/>
+                                <input 
+                                    disabled={props.entry?true:false}
+                                    type="number" 
+                                    step={1} 
+                                    min={1} 
+                                    max={99} 
+                                    value={installments} 
+                                    onChange={(e) => setInstallments(parseInt(e.target.value))}/>
                             </div>
                         </div>
                 </Container>

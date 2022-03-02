@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { 
     Container, 
@@ -7,10 +7,11 @@ import {
     TypeContainer, 
     AmountContainer,
     PaidContainer,
-    OptionsContainer } from './styles';
+    OptionsContainer,
+    MenuBox } from './styles';
 
 import { BiPlus, BiMinus } from 'react-icons/bi';
-import { MdCheckBox, MdCheckBoxOutlineBlank } from 'react-icons/md'
+import { MdCheckBox, MdCheckBoxOutlineBlank, MdEdit, MdDelete } from 'react-icons/md'
 import { IoRepeat } from 'react-icons/io5';
 import { HiDotsHorizontal } from 'react-icons/hi';
 
@@ -19,10 +20,14 @@ import ApiEntry from '../../types/ApiEntry';
 interface EntryProps {
     entry: ApiEntry;
     onPaidClick(id: number, paid: boolean): void;
+    onDeleteClick(id: number): void;
+    onEditClick(entry: ApiEntry): void;
 }
 
 const Entry: React.FC<EntryProps> = ( props ) => {
     
+    const[menuOpen, setMenuOpen] = useState(false)
+
     return (
         <Container>
             <PaidContainer 
@@ -44,8 +49,12 @@ const Entry: React.FC<EntryProps> = ( props ) => {
                 R$ {props.entry.amount}
             </AmountContainer>
             <OptionsContainer>
-                <button>
-                  <HiDotsHorizontal />  
+                <button onClick={() => setMenuOpen(true)} onBlur={() => setMenuOpen(false)}>
+                  <HiDotsHorizontal />
+                  <MenuBox open={menuOpen}>
+                    <div onClick={() => props.onEditClick(props.entry)}><MdEdit/></div>
+                    <div onClick={() => props.onDeleteClick(props.entry.id)}><MdDelete/></div>
+                  </MenuBox>  
                 </button>                
             </OptionsContainer>
         </Container>

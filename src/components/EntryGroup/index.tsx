@@ -11,6 +11,8 @@ interface EntryGroupProps {
     groupColor: string;
     entries: ApiEntry[];
     onPaidClick(id: number, paid: boolean): void;
+    onDeleteClick(id: number): void;
+    onEditClick(entry: ApiEntry): void;
 }
 
 const EntryGroup: React.FC<EntryGroupProps> = ( props ) => {
@@ -45,7 +47,14 @@ const EntryGroup: React.FC<EntryGroupProps> = ( props ) => {
             <h3>{ props.groupTitle }</h3>
             <EntriesList>
                 {
-                    entries.map((entry, index) => <EntryCard key={index} entry={entry} onPaidClick={props.onPaidClick}/>)
+                    entries.map((entry, index) => 
+                        <EntryCard 
+                            key={index}
+                            entry={entry}
+                            onPaidClick={props.onPaidClick}
+                            onDeleteClick={props.onDeleteClick}
+                            onEditClick={props.onEditClick}/>
+                    )
                 }                
             </EntriesList>
             <GroupSummaryContainer>

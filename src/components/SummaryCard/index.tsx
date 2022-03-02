@@ -8,13 +8,16 @@ interface SummaryCardProps {
 }
 
 const SummaryCard: React.FC<SummaryCardProps> = ( props ) => {
+
+    const balance = props.credit-props.debit
+
     return (
         <Container>
-            <Card className='leftover-negative'>
+            <Card className={ balance < 0? 'leftover-negative' : 'leftover-positive'}>
                 <h4>Saldo</h4>
                 <div>
                     <small>R$</small>
-                    <h1>{ props.credit - props.debit }</h1>
+                    <h1>{ balance }</h1>
                 </div>
             </Card>
             <Card>

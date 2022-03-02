@@ -25,6 +25,11 @@ const GlobalStyles = createGlobalStyle`
         padding: .5rem 1rem;
         border: 1px solid ${props => DefaultTheme.text3};
         border-radius: 5px;
+
+        :disabled {
+            background-color: ${props => DefaultTheme.surface2};
+            color: ${props => DefaultTheme.text3};
+        }
     }
 
     button {

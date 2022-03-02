@@ -28,6 +28,7 @@ export const Container = styled.div`
         &.selected {
             background-color: ${props => props.theme.primary};
             color: ${props => props.theme.surface0};
+            border-color: ${props => props.theme.primary};
         }
 
     }

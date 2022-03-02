@@ -7,7 +7,10 @@ import Header from "../../components/Header";
 import { Container, Row, Col } from 'react-grid-system';
 import PeriodSelector from "../../components/PeriodSelector";
 import SummaryCard from "../../components/SummaryCard";
-import { PeriodSelectorContainer, SummaryContainer } from "./styles";
+import { FiPlus } from 'react-icons/fi';
+
+import { PeriodSelectorContainer, SummaryContainer, ButtonBar } from "./styles";
+
 import EntryGroup from "../../components/EntryGroup";
 import Spinner from "../../components/Spinner";
 import ApiPeriod from "../../types/ApiPeriod";
@@ -29,6 +32,7 @@ const Home: React.FC = () => {
     const [totalDebits, setTotalDebits]  = useState(0)
 
     const [entryFormIsVisible, setEntryFormIsVisible] = useState(false)
+    const [editEntry, setEditEntry] = useState<ApiEntry | undefined>()
 
     useEffect(() => {
         loadPeriod(periodYear, periodMonth)
@@ -84,6 +88,15 @@ const Home: React.FC = () => {
         )
     }
 
+    function handleEditEntry(entry: ApiEntry) {
+        setEditEntry(entry)
+        setEntryFormIsVisible(true)
+    }
+
+    function handleDeleteEntry(id: number) {
+
+    }
+
     function showGroups(lEntries: ApiEntry[]) {
         return (
             period&&
@@ -95,6 +108,8 @@ const Home: React.FC = () => {
                         groupColor="inherit"
                         entries={lEntries}
                         onPaidClick={setPaid}
+                        onDeleteClick={handleDeleteEntry}
+                        onEditClick={handleEditEntry}
                     />
                     {
                         selectedWallet?.groups.map((group, index) => 
@@ -105,6 +120,8 @@ const Home: React.FC = () => {
                                 groupColor={group.color}
                                 entries={lEntries}
                                 onPaidClick={setPaid}
+                                onDeleteClick={handleDeleteEntry}
+                                onEditClick={handleEditEntry}
                             />
                         )
                     }
@@ -140,6 +157,7 @@ const Home: React.FC = () => {
                 periodMonth={periodMonth}
                 periodYear={periodYear}
                 onSave={onSaveEntry}
+                entry={editEntry}
             />
             <Container>
                 <Row>
@@ -172,8 +190,10 @@ const Home: React.FC = () => {
                         }                        
                     </Col>
                     <Col sm={12} md={12} lg={4}>
-                        <button className="primary" onClick={() => setEntryFormIsVisible(true)}>Nova entrada</button>
                         <SummaryContainer>
+                            <ButtonBar>
+                                <button onClick={() => setEntryFormIsVisible(true)}><FiPlus />Novo lançamento</button>
+                            </ButtonBar>
                             <SummaryCard 
                                 credit={totalCredits}
                                 debit={totalDebits}
